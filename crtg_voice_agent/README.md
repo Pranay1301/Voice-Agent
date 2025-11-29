@@ -1,72 +1,137 @@
-# CRTG AI Voice Agent
+# CRTG Voice Agent
 
-A multilingual voice agent system for real estate sales in the GCC, built with FastAPI, Twilio, Deepgram, OpenAI GPT-4, and ElevenLabs.
+![CRTG Voice Agent Banner](assets/banner.png)
 
-## Features
-- **Real-time Transcription**: Uses Deepgram for low-latency speech-to-text.
-- **Natural Conversation**: Powered by OpenAI GPT-4 with a custom real estate sales prompt.
-- **Human-like Voice**: Uses ElevenLabs for realistic text-to-speech.
-- **Call Handling**: Supports both inbound and outbound calls via Twilio.
-- **Logging**: Logs conversation turns and qualified leads.
+<div align="center">
 
-## Setup
+[![Python](https://img.shields.io/badge/Python-3.10%2B-blue?style=for-the-badge&logo=python&logoColor=white)](https://www.python.org/)
+[![FastAPI](https://img.shields.io/badge/FastAPI-0.109.0-009688?style=for-the-badge&logo=fastapi&logoColor=white)](https://fastapi.tiangolo.com/)
+[![Twilio](https://img.shields.io/badge/Twilio-Voice-F22F46?style=for-the-badge&logo=twilio&logoColor=white)](https://www.twilio.com/)
+[![OpenAI](https://img.shields.io/badge/OpenAI-GPT--4-412991?style=for-the-badge&logo=openai&logoColor=white)](https://openai.com/)
+[![Deepgram](https://img.shields.io/badge/Deepgram-STT-13EF93?style=for-the-badge&logo=deepgram&logoColor=black)](https://deepgram.com/)
+[![ElevenLabs](https://img.shields.io/badge/ElevenLabs-TTS-000000?style=for-the-badge&logo=elevenlabs&logoColor=white)](https://elevenlabs.io/)
 
-1.  **Install Dependencies**:
+**A next-generation multilingual voice agent for real estate sales, powered by Generative AI.**
+
+[Features](#-features) • [Architecture](#-architecture) • [Getting Started](#-getting-started) • [Usage](#-usage) • [Contributing](#-contributing)
+
+</div>
+
+---
+
+## 🚀 Features
+
+- **🗣️ Real-time Transcription**: Ultra-low latency speech-to-text using **Deepgram Nova-2**.
+- **🧠 Intelligent Conversations**: Powered by **Google Gemini 1.5 Flash** (or GPT-4) for natural, context-aware dialogue.
+- **🎙️ Human-like Voice**: Crystal clear, emotive text-to-speech via **ElevenLabs**.
+- **📞 Inbound & Outbound**: Seamlessly handle calls via **Twilio Programmable Voice**.
+- **📝 Structured Logging**: Automatically logs call metadata, transcripts, and qualified leads to JSON.
+- **⚡ WebSocket Streaming**: Full-duplex audio streaming for sub-second response times.
+
+## 🏗️ Architecture
+
+```mermaid
+graph TD
+    User([User 📞]) <-->|PSTN| Twilio
+    Twilio <-->|WebSocket Audio| Server[FastAPI Server]
+    
+    subgraph "AI Core"
+        Server -->|Stream Audio| Deepgram[Deepgram STT]
+        Deepgram -->|Transcript| Server
+        
+        Server -->|Prompt + Context| LLM[Gemini / GPT-4]
+        LLM -->|Response Text| Server
+        
+        Server -->|Text| TTS[ElevenLabs TTS]
+        TTS -->|Audio Stream| Server
+    end
+    
+    Server -->|Logs & Leads| DB[(JSON Logs)]
+```
+
+## 🛠️ Getting Started
+
+### Prerequisites
+
+- Python 3.10+
+- [ngrok](https://ngrok.com/) (for local testing)
+- API Keys: Twilio, Deepgram, ElevenLabs, Google Gemini
+
+### Installation
+
+1.  **Clone the repository**
+    ```bash
+    git clone https://github.com/Pranay1301/Voice-Agent.git
+    cd Voice-Agent/crtg_voice_agent
+    ```
+
+2.  **Install dependencies**
     ```bash
     pip install -r requirements.txt
     ```
 
-2.  **Environment Variables**:
-    Copy `.env.example` to `.env` and fill in your API keys:
-    - Twilio (Account SID, Auth Token, Phone Number)
-    - Gemini API Key
-    - ElevenLabs API Key & Voice ID
-    - Deepgram API Key
-
-    > **How to get ElevenLabs Configuration:**
-    > 1. Sign up/Login to [ElevenLabs](https://elevenlabs.io/).
-    > 2. Click on your profile icon (top right) -> **Profile + API Key**.
-    > 3. Click **Create New Key**.
-    > 4. **Permissions Needed**:
-    >    - **Text to Speech**: Set to **Access** (Required for generating audio).
-    >    - **Voices**: Set to **Read** (Required to fetch voice details).
-    >    - You can leave others as "No Access".
-    > 5. Copy the **API Key**.
-    > 6. Go to **Voices** -> **VoiceLab** or **Library**.
-    > 7. Select a voice you like. Click the "ID" label (usually looks like a hash) to copy the **Voice ID**.
-
-    > **How to get Deepgram Configuration:**
-    > 1. Sign up/Login to [Deepgram Console](https://console.deepgram.com/).
-    > 2. Go to **API Keys** in the left sidebar.
-    > 3. Click **Create New API Key**.
-    > 4. Give it a name (e.g., "Voice Agent") and assign "Member" permissions (or just leave default).
-    > 5. Copy the generated **API Key**.
-
-3.  **Run the Server**:
+3.  **Configure Environment**
+    Copy `.env.example` to `.env` and fill in your keys:
     ```bash
-    uvicorn main:app --reload
+    cp .env.example .env
+    ```
+    ```properties
+    TWILIO_ACCOUNT_SID="your_sid"
+    TWILIO_AUTH_TOKEN="your_token"
+    GEMINI_API_KEY="your_key"
+    ELEVENLABS_API_KEY="your_key"
+    DEEPGRAM_API_KEY="your_key"
     ```
 
-4.  **Expose Local Server**:
-    Use ngrok to expose your local server to the internet (required for Twilio webhooks):
-    ```bash
-    ngrok http 8000
-    ```
+## 🏃 Usage
 
-5.  **Configure Twilio**:
-    - Set the Voice Webhook URL for your Twilio number to `https://<your-ngrok-url>/incoming-call`.
-
-## Usage
-
-### Inbound Calls
-Call your Twilio phone number. The agent will answer and start the conversation.
-
-### Outbound Calls
-Run the `outbound_call.py` script:
+### 1. Start the Server
 ```bash
-python outbound_call.py <target_phone_number> https://<your-ngrok-url>
+uvicorn main:app --reload
 ```
 
-## Logging
-- Conversation logs are saved in `logs/call_YYYY-MM-DD.json`.
-- Qualified leads are logged via GPT function calling (currently printed to console, can be extended to save to DB).
+### 2. Expose to Internet
+```bash
+ngrok http 8000
+```
+
+### 3. Configure Twilio
+Update your Twilio Phone Number's **Voice Webhook** to:
+`https://<your-ngrok-url>/incoming-call`
+
+### 4. Make a Call
+- **Inbound**: Call your Twilio number.
+- **Outbound**:
+  ```bash
+  python outbound_call.py <target_number> https://<your-ngrok-url>
+  ```
+
+## 📊 Logging
+
+Calls are logged in `logs/` with structured JSON data:
+
+```json
+{
+  "stream_sid_...": {
+    "status": "active",
+    "turns": [
+      { "role": "user", "text": "I want to buy a villa." },
+      { "role": "assistant", "text": "Sure, what is your budget?" }
+    ],
+    "lead_info": {
+      "name": "John Doe",
+      "budget": "5M AED"
+    }
+  }
+}
+```
+
+## 🤝 Contributing
+
+Contributions are welcome! Please feel free to submit a Pull Request.
+
+---
+
+<div align="center">
+  <sub>Built with ❤️ by CRTG AI</sub>
+</div>
