@@ -1,0 +1,10 @@
+fastapi
+uvicorn
+twilio
+google-generativeai
+elevenlabs
+deepgram-sdk
+python-dotenv
+websockets
+requests
+pydantic
