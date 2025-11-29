@@ -16,3 +16,7 @@ wheels/
 
 # OS generated files
 .DS_Store
+
+# Logs
+logs/
+crtg_voice_agent/logs/

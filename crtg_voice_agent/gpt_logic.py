@@ -65,28 +65,25 @@ class GPTLogic:
     async def generate_response(self, user_input):
         """
         Generates a response from Gemini based on the conversation history.
+        Returns:
+            tuple: (response_text, function_call_data)
         """
         try:
             # Send message to Gemini
             response = await self.chat.send_message_async(user_input)
             
-            # Check if there are function calls (handled automatically by enable_automatic_function_calling=True usually, 
-            # but we might want to log it or handle side effects if we were doing manual handling.
-            # With enable_automatic_function_calling=True, the SDK executes the function if we provided the implementation.
-            # However, here we just defined the schema. 
-            # For this prototype, let's just let Gemini generate the text response.
-            # If we want to actually execute the code, we need to pass the functions map to start_chat.
+            function_call_data = None
             
-            # Let's inspect the parts to see if a function call happened, just for logging.
+            # Inspect parts for function calls
             for part in response.parts:
                 if fn := part.function_call:
                     print(f"Gemini requested function call: {fn.name} with args: {fn.args}")
-                    # In a real scenario with automatic calling, we'd need to provide the function map.
-                    # Since we didn't provide a map, we might need to handle it manually or just let it be.
-                    # BUT, the user asked to "simulate booking/tagging". 
-                    # Let's just return the text response for now.
+                    function_call_data = {
+                        "name": fn.name,
+                        "args": dict(fn.args)
+                    }
             
-            return response.text
+            return response.text, function_call_data
         except Exception as e:
             print(f"Error generating Gemini response: {e}")
-            return "I'm sorry, I'm having trouble understanding. Could you repeat that?"
+            return "I'm sorry, I'm having trouble understanding. Could you repeat that?", None

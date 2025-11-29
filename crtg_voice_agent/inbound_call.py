@@ -8,7 +8,7 @@ from twilio.twiml.voice_response import VoiceResponse, Connect
 from transcriber import Transcriber
 from gpt_logic import GPTLogic
 from tts_engine import TTSEngine
-from utils.logger import log_call_turn
+from utils.logger import log_call_start, log_call_turn, log_lead_info
 
 router = APIRouter()
 
@@ -53,6 +53,7 @@ async def media_stream(websocket: WebSocket):
                 if data['event'] == 'start':
                     stream_sid = data['start']['streamSid']
                     print(f"Stream started: {stream_sid}")
+                    log_call_start(stream_sid)
                 elif data['event'] == 'media':
                     media = data['media']
                     chunk = base64.b64decode(media['payload'])
@@ -69,12 +70,17 @@ async def media_stream(websocket: WebSocket):
             async for transcript in transcriber.get_transcription():
                 print(f"User: {transcript}")
                 
+                if stream_sid:
+                    log_call_turn(stream_sid, "user", transcript)
+                
                 # Get GPT response
-                gpt_response = await gpt.generate_response(transcript)
+                gpt_response, function_call = await gpt.generate_response(transcript)
                 print(f"GPT: {gpt_response}")
                 
-                # Log the turn
-                log_call_turn("inbound", transcript, gpt_response)
+                if stream_sid:
+                    log_call_turn(stream_sid, "assistant", gpt_response)
+                    if function_call:
+                        log_lead_info(stream_sid, function_call)
 
                 # Generate TTS and stream back
                 async for audio_chunk in tts.generate_audio(gpt_response):
