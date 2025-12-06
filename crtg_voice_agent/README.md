@@ -78,53 +78,37 @@ graph TD
     ```properties
     TWILIO_ACCOUNT_SID="your_sid"
     TWILIO_AUTH_TOKEN="your_token"
+    TWILIO_PHONE_NUMBER="your_number"
     GEMINI_API_KEY="your_key"
     ELEVENLABS_API_KEY="your_key"
+    ELEVENLABS_VOICE_ID="your_id"
     DEEPGRAM_API_KEY="your_key"
+    DATABASE_URL="postgresql+asyncpg://user:pass@host/dbname"
     ```
 
 ## 🏃 Usage
 
-### 1. Start the Server
+### Local Development
 ```bash
 uvicorn main:app --reload
 ```
 
-### 2. Expose to Internet
-```bash
-ngrok http 8000
-```
+### Docker Deployment
+1.  **Build the image**
+    ```bash
+    docker build -t voice-agent .
+    ```
+2.  **Run the container**
+    ```bash
+    docker run --env-file .env -p 8000:8000 voice-agent
+    ```
 
-### 3. Configure Twilio
-Update your Twilio Phone Number's **Voice Webhook** to:
-`https://<your-ngrok-url>/incoming-call`
+## 🏥 Health Check
 
-### 4. Make a Call
-- **Inbound**: Call your Twilio number.
-- **Outbound**:
-  ```bash
-  python outbound_call.py <target_number> https://<your-ngrok-url>
-  ```
-
-## 📊 Logging
-
-Calls are logged in `logs/` with structured JSON data:
-
-```json
-{
-  "stream_sid_...": {
-    "status": "active",
-    "turns": [
-      { "role": "user", "text": "I want to buy a villa." },
-      { "role": "assistant", "text": "Sure, what is your budget?" }
-    ],
-    "lead_info": {
-      "name": "John Doe",
-      "budget": "5M AED"
-    }
-  }
-}
-```
+Endpoint: `GET /health`
+Response: `{"status": "ok"}`
+- **Tables**: `call_logs`, `call_turns`
+- **ORM**: SQLAlchemy + AsyncPG
 
 ## 🤝 Contributing
 

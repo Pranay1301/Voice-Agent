@@ -53,7 +53,8 @@ async def media_stream(websocket: WebSocket):
                 if data['event'] == 'start':
                     stream_sid = data['start']['streamSid']
                     print(f"Stream started: {stream_sid}")
-                    log_call_start(stream_sid)
+                    print(f"Stream started: {stream_sid}")
+                    await log_call_start(stream_sid)
                 elif data['event'] == 'media':
                     media = data['media']
                     chunk = base64.b64decode(media['payload'])
@@ -71,16 +72,16 @@ async def media_stream(websocket: WebSocket):
                 print(f"User: {transcript}")
                 
                 if stream_sid:
-                    log_call_turn(stream_sid, "user", transcript)
+                    await log_call_turn(stream_sid, "user", transcript)
                 
                 # Get GPT response
                 gpt_response, function_call = await gpt.generate_response(transcript)
                 print(f"GPT: {gpt_response}")
                 
                 if stream_sid:
-                    log_call_turn(stream_sid, "assistant", gpt_response)
+                    await log_call_turn(stream_sid, "assistant", gpt_response)
                     if function_call:
-                        log_lead_info(stream_sid, function_call)
+                        await log_lead_info(stream_sid, function_call)
 
                 # Generate TTS and stream back
                 async for audio_chunk in tts.generate_audio(gpt_response):

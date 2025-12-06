@@ -8,3 +8,7 @@ python-dotenv
 websockets
 requests
 pydantic
+pydantic-settings
+sqlalchemy
+asyncpg
+alembic
