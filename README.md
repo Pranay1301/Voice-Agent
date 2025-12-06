@@ -46,7 +46,7 @@ graph TD
         TTS -->|Audio Stream| Server
     end
     
-    Server -->|Logs & Leads| DB[(JSON Logs)]
+    Server -->|Logs & Leads| DB[(PostgreSQL)]
 ```
 
 ## 🛠️ Getting Started
@@ -102,6 +102,12 @@ uvicorn main:app --reload
     ```bash
     docker run --env-file .env -p 8000:8000 voice-agent
     ```
+
+## 📊 Logging & Database
+
+Calls are logged to the database defined in `DATABASE_URL`.
+- **Tables**: `call_logs`, `call_turns`
+- **ORM**: SQLAlchemy + AsyncPG
 
 ## 🏥 Health Check
 
