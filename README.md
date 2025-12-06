@@ -141,9 +141,21 @@ Response: `{"status": "ok"}`
 - **Database Connection**: Ensure your `DATABASE_URL` is correct and the Postgres server is accessible from the container or local machine.
 - **Latency**: If response is slow, check your internet connection or switch to a closer region for servers.
 
-## 🤝 Contributing
+## 💡 Technical Details & Learnings
 
-Contributions are welcome! Please feel free to submit a Pull Request.
+### 🔧 Key Implementation Details
+- **Architecture**: We switched from a simple file-based logging system to a robust **PostgreSQL** architecture using **SQLAlchemy** (ORM) and **AsyncPG** (driver). This allows for scalable, concurrent write operations without blocking the main event loop.
+- **Resilience**: A global exception handler (`@app.exception_handler`) ensures the FastAPI server never crashes from unhandled errors. Critical external calls (Twilio, Deepgram, LLM) are wrapped in `try/except` blocks to degrade gracefully (e.g., log error but keep connection alive).
+- **Concurrency**: The system heavily relies on Python's `asyncio` to handle simultaneous WebSocket streams (Audio I/O) and database writes.
+
+### 🧠 Lessons Learned
+- **Latency is King**: Handling audio streams requires non-blocking code. Any synchronous operation (like standard `requests` or blocking DB calls) would stutter the audio.
+- **State Management**: Managing conversation state across HTTP (Webhooks) and WebSockets is complex. We used `stream_sid` as the unique key to tie disparate events (Call Start -> Audio Stream -> DB Log) together.
+- **Environment Consistency**: "It works on my machine" is solved by Docker. Encapsulating system-level dependencies (like `ffmpeg` or specific Python versions) ensures smooth deployment.
+
+### 🔮 Future Improvements
+- **Interruption Handling**: Implement "barge-in" to stop TTS immediately when the user speaks.
+- **Function Calling**: Expand the Gemini toolset to allow the agent to schedule appointments or send emails directly.
 
 ---
 
