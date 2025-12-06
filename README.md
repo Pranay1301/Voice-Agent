@@ -159,6 +159,3 @@ Response: `{"status": "ok"}`
 
 ---
 
-<div align="center">
-  <sub>Built with ❤️ by CRTG AI</sub>
-</div>
