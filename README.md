@@ -70,21 +70,41 @@ graph TD
     pip install -r requirements.txt
     ```
 
-3.  **Configure Environment**
-    Copy `.env.example` to `.env` and fill in your keys:
-    ```bash
-    cp .env.example .env
-    ```
-    ```properties
-    TWILIO_ACCOUNT_SID="your_sid"
-    TWILIO_AUTH_TOKEN="your_token"
-    TWILIO_PHONE_NUMBER="your_number"
-    GEMINI_API_KEY="your_key"
-    ELEVENLABS_API_KEY="your_key"
-    ELEVENLABS_VOICE_ID="your_id"
-    DEEPGRAM_API_KEY="your_key"
-    DATABASE_URL="postgresql+asyncpg://user:pass@host/dbname"
-    ```
+## 📂 Directory Structure
+
+```text
+crtg_voice_agent/
+├── main.py            # FastAPI entry point & global error handling
+├── inbound_call.py    # Handles Twilio WebSocket & conversation loop
+├── outbound_call.py   # Script to initiate outbound calls
+├── gpt_logic.py       # Logic for Gemini/GPT interaction & function calling
+├── transcriber.py     # Deepgram STT integration
+├── tts_engine.py      # ElevenLabs TTS integration
+├── database.py        # Async database connection setup
+├── models.py          # SQLAlchemy models (CallLog, CallTurn)
+├── config.py          # Pydantic settings & env validation
+├── inputs/            # (Optional) Pre-recorded audio for testing
+├── logs/              # (Deprecated) Local JSON logs
+└── utils/
+    └── logger.py      # Async logging service
+```
+
+## ⚙️ Configuration
+
+Copy `.env.example` to `.env` and fill in the following:
+
+| Variable | Description |
+| :--- | :--- |
+| `TWILIO_ACCOUNT_SID` | Your Twilio Account SID |
+| `TWILIO_AUTH_TOKEN` | Your Twilio Auth Token |
+| `TWILIO_PHONE_NUMBER` | Your purchased Twilio phone number |
+| `GEMINI_API_KEY` | Google Gemini API Key |
+| `ELEVENLABS_API_KEY` | ElevenLabs API Key |
+| `ELEVENLABS_VOICE_ID` | Voice ID (e.g., `21m00Tcm4TlvDq8ikWAM` for Rachel) |
+| `DEEPGRAM_API_KEY` | Deepgram API Key |
+| `DATABASE_URL` | Postgres connection string (e.g., `postgresql+asyncpg://...`) |
+
+
 
 ## 🏃 Usage
 
@@ -113,6 +133,13 @@ Calls are logged to the database defined in `DATABASE_URL`.
 
 Endpoint: `GET /health`
 Response: `{"status": "ok"}`
+
+## 🔧 Troubleshooting
+
+- **Twilio 11100 Error**: Usually means the webhook URL is unreachable. Ensure `ngrok` is running and the URL is updated in Twilio Console.
+- **WebSocket Disconnects**: Check if Deepgram/ElevenLabs API keys are valid. Invalid keys often cause immediate closure.
+- **Database Connection**: Ensure your `DATABASE_URL` is correct and the Postgres server is accessible from the container or local machine.
+- **Latency**: If response is slow, check your internet connection or switch to a closer region for servers.
 
 ## 🤝 Contributing
 
