@@ -107,8 +107,6 @@ uvicorn main:app --reload
 
 Endpoint: `GET /health`
 Response: `{"status": "ok"}`
-- **Tables**: `call_logs`, `call_turns`
-- **ORM**: SQLAlchemy + AsyncPG
 
 ## 🤝 Contributing
 
