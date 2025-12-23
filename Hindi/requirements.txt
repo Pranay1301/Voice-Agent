@@ -1,0 +1,11 @@
+fastapi
+uvicorn
+websockets
+python-dotenv
+google-cloud-speech
+requests
+aiohttp
+google-generativeai
+pydantic
+pydantic-settings
+uuid
