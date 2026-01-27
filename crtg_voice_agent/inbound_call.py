@@ -9,6 +9,7 @@ from transcriber import Transcriber
 from gpt_logic import GPTLogic
 from tts_engine import TTSEngine
 from utils.logger import log_call_start, log_call_turn, log_lead_info
+from email_service import send_appointment_email
 
 router = APIRouter()
 
@@ -18,6 +19,7 @@ async def incoming_call(request: Request):
     Handle incoming calls from Twilio.
     """
     response = VoiceResponse()
+    response.answer()  # Answers the call immediately
     response.say("Connecting you to the AI sales assistant.")
     connect = Connect()
     connect.stream(url=f"wss://{request.headers.get('host')}/media-stream")
@@ -44,6 +46,31 @@ async def media_stream(websocket: WebSocket):
         return
 
     stream_sid = None
+    greeting_sent = asyncio.Event()
+
+    # Initial greeting message
+    INITIAL_GREETING = "Hi! I'm your real estate agent. Are you looking to buy or rent?"
+
+    async def send_initial_greeting():
+        """Send the initial greeting as soon as the stream starts."""
+        nonlocal stream_sid
+        await greeting_sent.wait()  # Wait for stream to start
+        
+        if stream_sid:
+            print(f"Sending initial greeting...")
+            await log_call_turn(stream_sid, "assistant", INITIAL_GREETING)
+            
+            # Generate TTS and stream back
+            async for audio_chunk in tts.generate_audio(INITIAL_GREETING):
+                media_message = {
+                    "event": "media",
+                    "streamSid": stream_sid,
+                    "media": {
+                        "payload": base64.b64encode(audio_chunk).decode("ascii")
+                    }
+                }
+                await websocket.send_text(json.dumps(media_message))
+            print("Initial greeting sent!")
 
     async def receive_from_twilio():
         nonlocal stream_sid
@@ -53,8 +80,8 @@ async def media_stream(websocket: WebSocket):
                 if data['event'] == 'start':
                     stream_sid = data['start']['streamSid']
                     print(f"Stream started: {stream_sid}")
-                    print(f"Stream started: {stream_sid}")
                     await log_call_start(stream_sid)
+                    greeting_sent.set()  # Signal that stream is ready
                 elif data['event'] == 'media':
                     media = data['media']
                     chunk = base64.b64decode(media['payload'])
@@ -82,6 +109,12 @@ async def media_stream(websocket: WebSocket):
                     await log_call_turn(stream_sid, "assistant", gpt_response)
                     if function_call:
                         await log_lead_info(stream_sid, function_call)
+                        # Send appointment confirmation email
+                        if function_call.get("name") == "book_appointment":
+                            appointment_data = function_call.get("args", {})
+                            email_sent = send_appointment_email(appointment_data)
+                            if email_sent:
+                                print(f"📧 Appointment email sent to {appointment_data.get('email')}")
 
                 # Generate TTS and stream back
                 async for audio_chunk in tts.generate_audio(gpt_response):
@@ -99,7 +132,7 @@ async def media_stream(websocket: WebSocket):
 
     # Run tasks concurrently
     try:
-        await asyncio.gather(receive_from_twilio(), send_to_twilio())
+        await asyncio.gather(receive_from_twilio(), send_to_twilio(), send_initial_greeting())
     except Exception as e:
         print(f"Connection error: {e}")
     finally:

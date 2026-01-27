@@ -1,6 +1,5 @@
 import os
 import json
-import asyncio
 import websockets
 from dotenv import load_dotenv
 
@@ -17,16 +16,19 @@ class Transcriber:
         """
         Connects to Deepgram's WebSocket API for real-time transcription.
         """
-        # Using the Deepgram WebSocket API directly for better control over the stream
-        # Model: nova-2 is generally good for general purpose, but let's stick to a fast one.
-        url = "wss://api.deepgram.com/v1/listen?encoding=mulaw&sample_rate=8000&model=nova-2&smart_format=true"
-        extra_headers = {
+        url = "wss://api.deepgram.com/v1/listen?encoding=mulaw&sample_rate=8000&model=nova-2&smart_format=true&interim_results=false"
+        headers = {
             "Authorization": f"Token {self.api_key}"
         }
         
         try:
-            self.connection = await websockets.connect(url, extra_headers=extra_headers)
+            self.connection = await websockets.connect(url, additional_headers=headers)
             print("Connected to Deepgram")
+            return self.connection
+        except TypeError:
+            # Fallback for older websockets versions
+            self.connection = await websockets.connect(url, extra_headers=headers)
+            print("Connected to Deepgram (legacy)")
             return self.connection
         except Exception as e:
             print(f"Failed to connect to Deepgram: {e}")
@@ -34,32 +36,55 @@ class Transcriber:
 
     async def send_audio(self, chunk):
         """
-        Sends audio chunk to Deepgram.
+        Sends an audio chunk to Deepgram for transcription.
         """
         if self.connection:
-            await self.connection.send(chunk)
+            try:
+                await self.connection.send(chunk)
+            except Exception as e:
+                print(f"Error sending to Deepgram: {e}")
 
     async def get_transcription(self):
         """
-        Yields transcriptions from Deepgram.
+        Receives transcription responses from Deepgram.
+        Yields final transcription texts.
         """
         if not self.connection:
-            raise Exception("Not connected to Deepgram")
-
+            return
+            
         try:
             async for message in self.connection:
-                data = json.loads(message)
-                if "channel" in data:
-                    alternatives = data["channel"]["alternatives"]
-                    if alternatives:
-                        transcript = alternatives[0]["transcript"]
-                        if transcript and data["is_final"]:
-                            yield transcript
+                try:
+                    data = json.loads(message)
+                    
+                    # Deepgram response structure:
+                    # {"type": "Results", "channel_index": [0,1], "is_final": true, 
+                    #  "channel": {"alternatives": [{"transcript": "hello", ...}]}}
+                    
+                    if data.get("type") == "Results" and data.get("is_final", False):
+                        alternatives = data.get("channel", {}).get("alternatives", [])
+                        if alternatives:
+                            transcript = alternatives[0].get("transcript", "").strip()
+                            if transcript:
+                                yield transcript
+                                
+                except json.JSONDecodeError:
+                    continue
+                except Exception as e:
+                    print(f"Error parsing Deepgram response: {e}")
+                    
         except websockets.exceptions.ConnectionClosed:
             print("Deepgram connection closed")
         except Exception as e:
             print(f"Error receiving from Deepgram: {e}")
 
     async def close(self):
+        """
+        Closes the Deepgram connection.
+        """
         if self.connection:
-            await self.connection.close()
+            try:
+                await self.connection.close()
+                print("Deepgram connection closed")
+            except Exception as e:
+                print(f"Error closing Deepgram connection: {e}")

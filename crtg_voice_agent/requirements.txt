@@ -12,3 +12,6 @@ pydantic-settings
 sqlalchemy
 asyncpg
 alembic
+aiosqlite
+gTTS
+pydub

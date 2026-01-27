@@ -1,48 +1,34 @@
 import os
 import google.generativeai as genai
 from dotenv import load_dotenv
-import json
 
 load_dotenv()
 
-SYSTEM_PROMPT = """You are a multilingual AI sales assistant for a real estate agency. 
-Your goal is to engage leads naturally, qualify them with smart questions, and log usable sales data.
+SYSTEM_PROMPT = """You are a friendly, natural-sounding real estate sales agent for a GCC property company.
 
-Conversation Flow:
-1. Greet callers professionally.
-2. Ask whether they are looking to buy or rent.
-3. If yes, ask their location, budget, and timeline.
-4. Clarify unclear answers.
-5. If uninterested, thank them and end the call.
+YOUR PRIMARY GOAL: Help callers with property inquiries and book viewing appointments.
 
-Behavior expectations:
-- Ask qualifying questions like a trained agent.
-- Clarify hesitation or vagueness.
-- Speak naturally (not robotic or overly formal).
-- Keep responses concise (ideal for voice).
+CONVERSATION GUIDELINES:
+1. ALWAYS answer the user's question FIRST before continuing any booking flow
+2. If they ask about weather, prices, locations, or anything else - answer it naturally
+3. Be conversational, warm, and helpful - not robotic or scripted
+4. Keep responses SHORT (under 25 words) - this is a phone call, not a chat
+5. Use natural filler words occasionally ("Sure!", "Great question!", "Absolutely!")
+
+BOOKING FLOW (follow loosely, not rigidly):
+- Find out: buy or rent?
+- Location preference
+- Property type (villa, apartment, etc.)
+- Budget range
+- Viewing date/time
+- Name and email for confirmation
+
+IMPORTANT RULES:
+- If user asks a question, ANSWER IT first, then gently guide back to booking
+- If user seems confused or has concerns, address them empathetically
+- Never sound like you're reading a script
+- One question at a time, conversationally
 """
-
-# Define the tool for Gemini
-log_lead_tool = {
-    "function_declarations": [
-        {
-            "name": "log_lead",
-            "description": "Log a qualified lead's details. Use this when you have gathered the user's name, contact info, and property preferences.",
-            "parameters": {
-                "type": "OBJECT",
-                "properties": {
-                    "name": {"type": "STRING", "description": "Lead's full name."},
-                    "phone": {"type": "STRING", "description": "Lead's phone number."},
-                    "budget": {"type": "STRING", "description": "Lead's budget range."},
-                    "location_preference": {"type": "STRING", "description": "Preferred location."},
-                    "property_type": {"type": "STRING", "description": "Type of property."},
-                    "notes": {"type": "STRING", "description": "Any additional notes."}
-                },
-                "required": ["name", "phone", "location_preference"]
-            }
-        }
-    ]
-}
 
 class GPTLogic:
     def __init__(self):
@@ -52,15 +38,14 @@ class GPTLogic:
         
         genai.configure(api_key=self.api_key)
         
-        # Initialize the model
+        # Using Gemini 2.0 Flash - faster and supports system instructions
         self.model = genai.GenerativeModel(
-            model_name='gemini-1.5-flash',
-            system_instruction=SYSTEM_PROMPT,
-            tools=[log_lead_tool]
+            model_name='gemini-2.0-flash',
+            system_instruction=SYSTEM_PROMPT
         )
         
         # Start a chat session
-        self.chat = self.model.start_chat(enable_automatic_function_calling=True)
+        self.chat = self.model.start_chat()
 
     async def generate_response(self, user_input):
         """
@@ -69,21 +54,8 @@ class GPTLogic:
             tuple: (response_text, function_call_data)
         """
         try:
-            # Send message to Gemini
             response = await self.chat.send_message_async(user_input)
-            
-            function_call_data = None
-            
-            # Inspect parts for function calls
-            for part in response.parts:
-                if fn := part.function_call:
-                    print(f"Gemini requested function call: {fn.name} with args: {fn.args}")
-                    function_call_data = {
-                        "name": fn.name,
-                        "args": dict(fn.args)
-                    }
-            
-            return response.text, function_call_data
+            return response.text, None
         except Exception as e:
-            print(f"Error generating Gemini response: {e}")
-            return "I'm sorry, I'm having trouble understanding. Could you repeat that?", None
+            print(f"Error generating response: {e}")
+            return "Sorry, could you repeat that?", None
