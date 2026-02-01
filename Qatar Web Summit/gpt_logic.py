@@ -9,7 +9,7 @@ load_dotenv()
 
 # Build dynamic knowledge context from scraped data
 def build_knowledge_context():
-    """Build the knowledge context string from scraped data"""
+    """Build the knowledge context string from scraped data including venue map"""
     
     # Get current Doha time
     doha_tz = pytz.timezone('Asia/Qatar')
@@ -38,20 +38,82 @@ def build_knowledge_context():
     
     event = KNOWLEDGE_BASE["event_info"]
     night = KNOWLEDGE_BASE["night_summit"]
+    venue = KNOWLEDGE_BASE["venue"]
+    
+    # Format stages
+    stages_text = "\n".join([
+        f"  - {s['name']} ({s['floor']}): {s['description']}" +
+        (f" | Events: {', '.join(s.get('events', []))}" if s.get('events') else "")
+        for s in KNOWLEDGE_BASE["stages"]
+    ])
+    
+    # Format lounges
+    lounges_text = "\n".join([
+        f"  - {l['name']}" + (f" (by {l.get('sponsor', 'N/A')})" if l.get('sponsor') else "") +
+        f": {l.get('access', 'All attendees')}"
+        for l in KNOWLEDGE_BASE["lounges"]
+    ])
+    
+    # Format food areas
+    food_text = ", ".join([f["name"] for f in KNOWLEDGE_BASE["food_areas"]])
+    
+    # Format facilities
+    facilities_text = ", ".join([f["name"] for f in KNOWLEDGE_BASE["facilities"]])
+    
+    # Format entrances
+    entrances_text = "\n".join([
+        f"  - {e['name']}: {e.get('location', e.get('floor', ''))}"
+        for e in KNOWLEDGE_BASE["entrances_exits"]
+    ])
+    
+    # Format transport
+    transport_text = "\n".join([
+        f"  - {t['name']}: {t['description']}"
+        for t in KNOWLEDGE_BASE["transport"]
+    ])
+    
+    # Format navigation tips
+    nav_tips = "\n".join([f"  • {tip}" for tip in KNOWLEDGE_BASE["navigation_tips"]])
     
     return f"""
-=== LIVE SCRAPED DATA FROM qatar.websummit.com (Last Updated: January 30, 2026) ===
+=== LIVE SCRAPED DATA FROM qatar.websummit.com (Last Updated: February 1, 2026) ===
 
 CURRENT DOHA TIME: {doha_time.strftime('%A, %B %d, %Y at %I:%M %p')} (Asia/Qatar timezone)
 
 EVENT INFORMATION:
 - Event: {event['name']} {event['year']}
 - Dates: {event['dates']}
-- Venue: {event['location']}
+- Venue: {venue['name']}
+- Address: {venue['address']}
 - City: {event['city']}, {event['country']}
-- Description: {event['description']}
 - Expected Attendance: 30,000+ attendees
 - Website: {event['website']}
+- Interactive Map: {venue['map_url']}
+
+VENUE LAYOUT & STAGES:
+{stages_text}
+
+MASTERCLASS ROOMS (First Floor):
+  - Masterclass 1, 2, 3 - Take escalators near the concourse
+
+LOUNGES & NETWORKING:
+{lounges_text}
+
+FOOD & DINING:
+{food_text}
+- Main food area is near Night Summit (right side of venue)
+
+FACILITIES:
+{facilities_text}
+
+ENTRANCES & EXITS:
+{entrances_text}
+
+TRANSPORT TO VENUE:
+{transport_text}
+
+NAVIGATION TIPS:
+{nav_tips}
 
 CONFIRMED SPEAKERS (Verified from official website):
 {speakers_text}
@@ -62,12 +124,11 @@ FEATURED STARTUPS (Sample - 800+ total startups exhibiting):
 
 IMPACT STARTUPS (Startups focused on positive social impact):
 {impact_startups_text}
-(Full list available at: https://qatar.websummit.com/startups/impact-startups/)
 
 NIGHT SUMMIT:
 - Name: {night['name']}
 - Description: {night['description']}
-- Location: {night['location']}
+- Location: Far right (east side) of the venue, near Food Summit area
 - Purpose: {night['purpose']}
 
 TOPICS COVERED AT THE EVENT:
@@ -81,13 +142,13 @@ WHO ATTENDS:
 
 USEFUL LINKS:
 - Book Tickets: {KNOWLEDGE_BASE['useful_links']['tickets']}
+- Venue Map: {KNOWLEDGE_BASE['useful_links']['venue_map']}
 - Volunteer: {KNOWLEDGE_BASE['useful_links']['volunteer']}
 - Support Centre: {KNOWLEDGE_BASE['useful_links']['support']}
-- Content Tracks: {KNOWLEDGE_BASE['useful_links']['tracks']}
-- Blog: {KNOWLEDGE_BASE['useful_links']['blog']}
 
 === END OF SCRAPED DATA ===
 """
+
 
 
 SYSTEM_PROMPT = """You are a real-time Qatar Web Summit Guide Agent for Web Summit Qatar 2026, operating in Doha.
@@ -110,17 +171,25 @@ WHAT YOU CAN CONFIDENTLY ANSWER:
 ✓ Event dates, venue, location (February 1-4, 2026 at DECC, Doha)
 ✓ Confirmed speakers listed in the data
 ✓ Featured startups and impact startups listed in the data
-✓ Night Summit details
+✓ Night Summit details and location
 ✓ Session formats (keynotes, panels, workshops, etc.)
 ✓ Who typically attends (founders, investors, developers, etc.)
 ✓ Topics covered (AI, Fintech, Climate Tech, etc.)
 ✓ How to get tickets, volunteer, or get support
+✓ VENUE NAVIGATION - Stages (Centre Stage, Stage 3-6, Q&A Stage)
+✓ VENUE NAVIGATION - Lounges (VIP, Startup, Speaker, Growth, Networking)
+✓ VENUE NAVIGATION - Food areas (Food Summit, Snoonu, MYLK coffee)
+✓ VENUE NAVIGATION - Facilities (Registration, Prayer rooms, Concourse)
+✓ VENUE NAVIGATION - Entrances (Main, Park North, Park South, Speaker)
+✓ VENUE NAVIGATION - Transport (Metro station, Taxi pickup)
+✓ VENUE NAVIGATION - Masterclass rooms (First Floor)
 
 WHAT YOU MUST NOT DO:
 ✗ Invent speaker names, startups, or session times not in the data
-✗ Make up stall locations or booth numbers
+✗ Make up specific booth numbers unless listed in data
 ✗ Act as a real estate agent or sell anything
 ✗ Ignore user questions to complete your own explanation
+✗ Give incorrect directions - if unsure, suggest checking the interactive map
 
 === BRANDING INSERTION — SUBTLE MODE (VOICE-OPTIMIZED) ===
 
