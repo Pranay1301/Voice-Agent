@@ -1,121 +1,292 @@
-# CRTG Voice Agent
+# Voice Agent
 
+A production-ready AI-powered real estate appointment booking system built with FastAPI, Groq, Deepgram, and Twilio.
 
+## Features
 
-<div align="center">
+### 🤖 AI-Powered Conversations
+- **Reduced Hallucination**: Advanced prompt engineering and response validation
+- **Structured Data Extraction**: Automatic extraction of names, emails, and property preferences
+- **Context Management**: Intelligent conversation flow with history limiting
+- **Multi-language Support**: Built-in support for international property markets
 
-[![Python](https://img.shields.io/badge/Python-3.10%2B-blue?style=for-the-badge&logo=python&logoColor=white)](https://www.python.org/)
-[![FastAPI](https://img.shields.io/badge/FastAPI-0.109.0-009688?style=for-the-badge&logo=fastapi&logoColor=white)](https://fastapi.tiangolo.com/)
-[![Twilio](https://img.shields.io/badge/Twilio-Voice-F22F46?style=for-the-badge&logo=twilio&logoColor=white)](https://www.twilio.com/)
-[![OpenAI](https://img.shields.io/badge/OpenAI-GPT--4-412991?style=for-the-badge&logo=openai&logoColor=white)](https://openai.com/)
-[![Deepgram](https://img.shields.io/badge/Deepgram-STT-13EF93?style=for-the-badge&logo=deepgram&logoColor=black)](https://deepgram.com/)
-[![ElevenLabs](https://img.shields.io/badge/ElevenLabs-TTS-000000?style=for-the-badge&logo=elevenlabs&logoColor=white)](https://elevenlabs.io/)
+### 📞 Production-Ready Call Handling
+- **WebSocket Streaming**: Real-time bidirectional audio streaming
+- **Error Recovery**: Automatic reconnection and retry logic for all services
+- **Security**: Twilio request validation and CORS protection
+- **Monitoring**: Comprehensive logging and health checks
 
-**A next-generation multilingual voice agent for real estate sales, powered by Generative AI.**
+### 🎯 Real Estate Specific
+- **Property Flow**: Structured booking flow (buy/rent → location → type → budget → time)
+- **Email Integration**: Automated appointment confirmation emails with HTML templates
+- **Lead Management**: Structured lead data storage and retrieval
+- **Multi-voice TTS**: Professional voice options with fallback mechanisms
 
-[Features](#-features) • [Architecture](#-architecture) • [Getting Started](#-getting-started) • [Usage](#-usage) • [Contributing](#-contributing)
+## Architecture
 
-</div>
-
----
-
-## 🚀 Features
-
-- **🗣️ Real-time Transcription**: Ultra-low latency speech-to-text using **Deepgram Nova-2**.
-- **🧠 Intelligent Conversations**: Powered by **Google Gemini 1.5 Flash** (or GPT-4) for natural, context-aware dialogue.
-- **🎙️ Human-like Voice**: Crystal clear, emotive text-to-speech via **ElevenLabs**.
-- **📞 Inbound & Outbound**: Seamlessly handle calls via **Twilio Programmable Voice**.
-- **📝 Structured Logging**: Automatically logs call metadata, transcripts, and qualified leads to JSON.
-- **⚡ WebSocket Streaming**: Full-duplex audio streaming for sub-second response times.
-
-## 🏗️ Architecture
-
-```mermaid
-graph TD
-    User([User 📞]) <-->|PSTN| Twilio
-    Twilio <-->|WebSocket Audio| Server[FastAPI Server]
-    
-    subgraph "AI Core"
-        Server -->|Stream Audio| Deepgram[Deepgram STT]
-        Deepgram -->|Transcript| Server
-        
-        Server -->|Prompt + Context| LLM[Gemini / GPT-4]
-        LLM -->|Response Text| Server
-        
-        Server -->|Text| TTS[ElevenLabs TTS]
-        TTS -->|Audio Stream| Server
-    end
-    
-    Server -->|Logs & Leads| DB[(JSON Logs)]
+```
+┌─────────────────┐    ┌──────────────────┐    ┌─────────────────┐
+│   Twilio Call   │───▶│   FastAPI App    │───▶│   GPT Logic     │
+│   (Inbound)     │    │   (WebSocket)    │    │   (Groq API)    │
+└─────────────────┘    └──────────────────┘    └─────────────────┘
+                                │                        │
+                                ▼                        ▼
+┌─────────────────┐    ┌──────────────────┐    ┌─────────────────┐
+│   Deepgram      │◀───│   Transcriber    │◀───│   TTS Engine    │
+│   (STT)         │    │   (Real-time)    │    │   (Deepgram)    │
+└─────────────────┘    └──────────────────┘    └─────────────────┘
+                                │
+                                ▼
+┌─────────────────┐    ┌──────────────────┐
+│   PostgreSQL    │◀───│   Database       │
+│   (Async)       │    │   (SQLAlchemy)   │
+└─────────────────┘    └──────────────────┘
 ```
 
-## 🛠️ Getting Started
+## Quick Start
 
-### Prerequisites
+### 1. Environment Setup
 
-- Python 3.10+
-- [ngrok](https://ngrok.com/) (for local testing)
-- API Keys: Twilio, Deepgram, ElevenLabs, Google Gemini
-
-### Installation
-
-1.  **Clone the repository**
-    ```bash
-    git clone https://github.com/Pranay1301/Voice-Agent.git
-    cd Voice-Agent/crtg_voice_agent
-    ```
-
-2.  **Install dependencies**
-    ```bash
-    pip install -r requirements.txt
-    ```
-
-3.  **Configure Environment**
-    Copy `.env.example` to `.env` and fill in your keys:
-    ```bash
-    cp .env.example .env
-    ```
-    ```properties
-    TWILIO_ACCOUNT_SID="your_sid"
-    TWILIO_AUTH_TOKEN="your_token"
-    TWILIO_PHONE_NUMBER="your_number"
-    GEMINI_API_KEY="your_key"
-    ELEVENLABS_API_KEY="your_key"
-    ELEVENLABS_VOICE_ID="your_id"
-    DEEPGRAM_API_KEY="your_key"
-    DATABASE_URL="postgresql+asyncpg://user:pass@host/dbname"
-    ```
-
-## 🏃 Usage
-
-### Local Development
 ```bash
-uvicorn main:app --reload
+# Clone and install dependencies
+git clone <repository-url>
+cd voice_agent
+pip install -r requirements.txt
+
+# Create environment file
+cp .env.example .env
 ```
 
-### Docker Deployment
-1.  **Build the image**
-    ```bash
-    docker build -t voice-agent .
-    ```
-2.  **Run the container**
-    ```bash
-    docker run --env-file .env -p 8000:8000 voice-agent
-    ```
+### 2. Environment Configuration
 
-## 🏥 Health Check
+```bash
+# Required API Keys
+GROQ_API_KEY=your_groq_api_key
+DEEPGRAM_API_KEY=your_deepgram_api_key
+TWILIO_ACCOUNT_SID=your_twilio_sid
+TWILIO_AUTH_TOKEN=your_twilio_token
 
-Endpoint: `GET /health`
-Response: `{"status": "ok"}`
-- **Tables**: `call_logs`, `call_turns`
-- **ORM**: SQLAlchemy + AsyncPG
+# Optional Configuration
+DEEPGRAM_TTS_VOICE=aura-athena-en  # British female (most natural)
+COMPANY_NAME="Your Real Estate Company"
+SMTP_HOST=smtp.gmail.com
+SMTP_PORT=587
+SMTP_USER=your_email@gmail.com
+SMTP_PASSWORD=your_app_password
+FROM_EMAIL=noreply@yourcompany.com
+```
 
-## 🤝 Contributing
+### 3. Database Setup
 
-Contributions are welcome! Please feel free to submit a Pull Request.
+```bash
+# Initialize database
+alembic upgrade head
+```
 
----
+### 4. Run the Application
 
-<div align="center">
-  <sub>Built with ❤️ by CRTG AI</sub>
-</div>
+```bash
+# Development
+uvicorn main:app --reload --host 0.0.0.0 --port 8000
+
+# Production
+python main.py
+```
+
+### 5. Configure Twilio
+
+1. Set your Twilio phone number's webhook to: `https://your-domain.com/incoming-call`
+2. Configure WebSocket URL: `wss://your-domain.com/media-stream`
+
+## API Endpoints
+
+### Health Check
+```http
+GET /health
+```
+
+### Call Management
+```http
+POST /incoming-call     # Twilio webhook for incoming calls
+WebSocket /media-stream # Real-time audio streaming
+```
+
+### Monitoring
+```http
+GET /metrics           # Application metrics
+GET /docs             # Interactive API documentation
+```
+
+## Production Deployment
+
+### Docker
+
+```dockerfile
+FROM python:3.11-slim
+
+WORKDIR /app
+COPY requirements.txt .
+RUN pip install -r requirements.txt
+
+COPY . .
+CMD ["python", "main.py"]
+```
+
+### Environment Variables for Production
+
+```bash
+# Security
+ALLOWED_HOSTS=yourdomain.com,api.yourdomain.com
+CORS_ORIGINS=https://yourdomain.com
+
+# Performance
+WORKERS=4
+MAX_CALL_DURATION=300
+MAX_TRANSCRIPTION_RETRIES=3
+
+# Monitoring
+LOG_LEVEL=INFO
+ENABLE_METRICS=true
+```
+
+### Load Balancing
+
+For high availability, deploy behind a load balancer with:
+
+- **Session Affinity**: Required for WebSocket connections
+- **Health Checks**: Use `/health` endpoint
+- **SSL Termination**: Handle at load balancer level
+
+## Error Handling & Monitoring
+
+### Error Categories
+
+1. **API Errors**: Rate limits, timeouts, authentication failures
+2. **Network Errors**: Connection drops, WebSocket failures
+3. **Audio Errors**: Transcription failures, TTS generation issues
+4. **Database Errors**: Connection failures, constraint violations
+
+### Monitoring
+
+- **Structured Logging**: All components log to structured format
+- **Performance Metrics**: Response times, error rates, call durations
+- **Health Checks**: Service availability monitoring
+- **Error Tracking**: Detailed error logging with context
+
+### Alerting
+
+Set up alerts for:
+- High error rates (>5%)
+- Long response times (>3 seconds)
+- Service unavailability
+- Database connection issues
+
+## Security
+
+### Authentication
+- Twilio request validation using HMAC signatures
+- API key management for external services
+
+### Data Protection
+- Encrypted database connections
+- Secure credential storage
+- Input validation and sanitization
+
+### Rate Limiting
+- Built-in retry logic with exponential backoff
+- Connection pooling for database operations
+- WebSocket connection limits
+
+## Testing
+
+### Unit Tests
+```bash
+pytest tests/unit/
+```
+
+### Integration Tests
+```bash
+pytest tests/integration/
+```
+
+### Load Testing
+```bash
+# Test with multiple concurrent calls
+pytest tests/load/ --concurrent
+```
+
+## Troubleshooting
+
+### Common Issues
+
+1. **WebSocket Connection Drops**
+   - Check network stability
+   - Verify Twilio configuration
+   - Monitor server resources
+
+2. **Poor Transcription Quality**
+   - Verify audio quality
+   - Check Deepgram API limits
+   - Consider model selection
+
+3. **TTS Failures**
+   - Check Deepgram API key
+   - Verify voice model availability
+   - Monitor fallback mechanisms
+
+4. **Database Issues**
+   - Check connection pool settings
+   - Monitor query performance
+   - Verify migrations are applied
+
+### Debug Mode
+
+Enable debug logging:
+```bash
+LOG_LEVEL=DEBUG
+DEBUG=true
+```
+
+### Performance Tuning
+
+1. **Database**
+   - Use connection pooling
+   - Optimize query patterns
+   - Add appropriate indexes
+
+2. **API Calls**
+   - Implement caching where appropriate
+   - Use connection pooling for HTTP
+   - Monitor API rate limits
+
+3. **Audio Processing**
+   - Optimize audio chunk sizes
+   - Use appropriate compression
+   - Monitor memory usage
+
+## Contributing
+
+1. Fork the repository
+2. Create a feature branch
+3. Write tests for your changes
+4. Ensure all tests pass
+5. Submit a pull request
+
+## License
+
+This project is licensed under the MIT License - see the LICENSE file for details.
+
+## Support
+
+For support and questions:
+- Create an issue on GitHub
+- Check the documentation
+- Review the troubleshooting guide
+
+## Changelog
+
+### v1.0.0
+- Initial production release
+- Hallucination reduction features
+- Comprehensive error handling
+- Production deployment guide

@@ -1,0 +1,26 @@
+{
+  "test_stream_sid_12345": {
+    "start_time": "2025-11-29T20:23:09.992925",
+    "status": "active",
+    "turns": [
+      {
+        "timestamp": "2025-11-29T20:23:09.993129",
+        "direction": "user",
+        "text": "I want to buy a house in Dubai."
+      },
+      {
+        "timestamp": "2025-11-29T20:23:09.993259",
+        "direction": "assistant",
+        "text": "Great! What is your budget?"
+      }
+    ],
+    "lead_info": {
+      "name": "John Doe",
+      "phone": "+1234567890",
+      "location_preference": "Dubai",
+      "budget": "2M AED",
+      "property_type": "Villa",
+      "notes": "Looking for sea view"
+    }
+  }
+}

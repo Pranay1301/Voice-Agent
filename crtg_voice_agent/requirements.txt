@@ -1,17 +1,42 @@
-fastapi
-uvicorn
-twilio
-google-generativeai
-elevenlabs
-deepgram-sdk
-python-dotenv
-websockets
-requests
-pydantic
-pydantic-settings
-sqlalchemy
-asyncpg
-alembic
-aiosqlite
-gTTS
-pydub
+# Core dependencies
+fastapi==0.104.1
+uvicorn[standard]==0.24.0.post1
+pydantic==2.5.0
+pydantic-settings==2.1.0
+
+# Database
+sqlalchemy==2.0.23
+asyncpg==0.29.0
+alembic==1.13.1
+
+# AI/ML
+groq==0.1.12
+openai==1.3.7
+
+# Audio processing
+pydub==0.25.1
+librosa==0.10.1
+
+# TTS
+gtts==2.4.0
+
+# WebRTC/Streaming
+websockets==12.0
+aiohttp==3.9.1
+
+# Twilio
+twilio==8.10.0
+
+# Utilities
+python-dotenv==1.0.0
+python-multipart==0.0.6
+email-validator==2.1.0
+
+# Monitoring
+prometheus-client==0.19.0
+
+# Development (optional)
+pytest==7.4.3
+pytest-asyncio==0.21.1
+black==23.11.0
+ruff==0.1.6
