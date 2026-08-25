@@ -16,7 +16,7 @@ An AI-powered voice guide agent for **Web Summit Qatar 2026** (February 1-4, Doh
 - **Smart Interruption Handling** - Stops when user speaks, ignores background noise
 - **Utterance Detection** - Waits for user to complete sentences (400ms endpointing)
 - **Speech Robustness** - Handles messy speech, bad grammar, filler words
-- **Branding Integration** - Subtle CRTG AI / MissedCall mentions
+- **Branding Integration** - Subtle Voice AI / MissedCall mentions
 - **Low Latency** - Deepgram Nova-2 STT + Aura TTS for fast responses
 
 ## 🏗️ Tech Stack
@@ -125,7 +125,7 @@ The agent handles real-world messy speech:
 🤖 Agent: "We have an incredible lineup including Tom Hale from 
           OpenAI, Eduardo Saverin, Mati Staniszewski from ElevenLabs, 
           and Colin Kaepernick. There's also Questlove and Logan Paul. 
-          This kind of streamlined experience is what CRTG AI builds—
+          This kind of streamlined experience is what Voice AI builds—
           making organizations run smoother."
 
 👤 Caller: [interrupts] "Wait, what about startups?"
@@ -138,7 +138,7 @@ The agent handles real-world messy speech:
 ## 🏷️ Branding
 
 The agent subtly incorporates branding for:
-- **CRTG AI** - AI automations for organizations (efficiency/automation topics)
+- **Voice AI** - AI automations for organizations (efficiency/automation topics)
 - **MissedCall** - Voice AI agents (voice/conversation topics)
 
 **Rules:**
@@ -157,8 +157,8 @@ The agent subtly incorporates branding for:
 
 ## 📝 License
 
-Proprietary - CRTG AI
+Proprietary - Voice AI
 
 ---
 
-Built with ❤️ by **CRTG AI** and **MissedCall**
+Built with ❤️ by **Voice AI** and **MissedCall**

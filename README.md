@@ -1,4 +1,4 @@
-# CRTG Voice Agent
+# Voice Agent
 
 
 
@@ -62,7 +62,7 @@ graph TD
 1.  **Clone the repository**
     ```bash
     git clone https://github.com/Pranay1301/Voice-Agent.git
-    cd Voice-Agent/crtg_voice_agent
+    cd Voice-Agent/Qatar\ Web\ Summit
     ```
 
 2.  **Install dependencies**
@@ -73,7 +73,7 @@ graph TD
 ## 📂 Directory Structure
 
 ```text
-crtg_voice_agent/
+Qatar Web Summit/
 ├── main.py            # FastAPI entry point & global error handling
 ├── inbound_call.py    # Handles Twilio WebSocket & conversation loop
 ├── outbound_call.py   # Script to initiate outbound calls
