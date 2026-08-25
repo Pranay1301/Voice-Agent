@@ -1,0 +1,36 @@
+{
+  "company": {
+    "name": "ElevateBox Properties",
+    "tagline": "Building Dreams, Elevating Lives",
+    "about": "ElevateBox Properties is a premium real estate company based in Hyderabad, specializing in residential properties across major Indian cities. We offer a curated selection of apartments, villas, and plots with modern amenities and excellent connectivity.",
+    "founded": "2020",
+    "headquarters": "Banjara Hills, Hyderabad"
+  },
+  "locations": [
+    { "city": "Mumbai", "areas": ["Andheri", "Bandra", "Powai", "Thane", "Navi Mumbai"], "starting_price": "₹60 Lakh" },
+    { "city": "Hyderabad", "areas": ["Gachibowli", "HITEC City", "Kondapur", "Banjara Hills", "Jubilee Hills"], "starting_price": "₹45 Lakh" },
+    { "city": "Bangalore", "areas": ["Whitefield", "Electronic City", "Sarjapur Road", "Hebbal"], "starting_price": "₹55 Lakh" },
+    { "city": "Pune", "areas": ["Hinjewadi", "Kharadi", "Wakad", "Baner"], "starting_price": "₹40 Lakh" }
+  ],
+  "property_types": [
+    { "type": "1BHK", "size_range": "450-650 sq ft", "price_range": "₹25 Lakh - ₹80 Lakh" },
+    { "type": "2BHK", "size_range": "750-1100 sq ft", "price_range": "₹45 Lakh - ₹1.5 Crore" },
+    { "type": "3BHK", "size_range": "1200-1800 sq ft", "price_range": "₹70 Lakh - ₹2.5 Crore" },
+    { "type": "Villa", "size_range": "2000-4000 sq ft", "price_range": "₹1.2 Crore - ₹5 Crore" },
+    { "type": "Plot", "size_range": "1000-5000 sq ft", "price_range": "₹20 Lakh - ₹2 Crore" }
+  ],
+  "amenities": ["Swimming Pool", "Gym", "Clubhouse", "Children's Play Area", "24/7 Security", "Power Backup", "Covered Parking", "Landscaped Gardens", "Jogging Track", "Indoor Games"],
+  "payment_options": ["Bank Loan Assistance", "Flexible Payment Plans", "No Pre-EMI for Under-Construction", "Subvention Schemes"],
+  "faqs": [
+    { "q": "What documents are needed?", "a": "Aadhar card, PAN card, income proof, and bank statements for the last 6 months." },
+    { "q": "Do you offer site visits?", "a": "Yes, we arrange complimentary site visits. We can schedule one at your convenience." },
+    { "q": "What is the booking amount?", "a": "Typically 10% of the property value. Exact amount depends on the specific project." },
+    { "q": "Is home loan available?", "a": "Yes, we have tie-ups with major banks like SBI, HDFC, ICICI for easy home loan processing." },
+    { "q": "What is RERA registration?", "a": "All our projects are RERA registered. We can share the RERA numbers for specific projects." }
+  ],
+  "contact": {
+    "phone": "+91-XXXXXXXXXX",
+    "email": "sales@elevatebox.in",
+    "website": "www.elevatebox.in"
+  }
+}
