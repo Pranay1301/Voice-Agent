@@ -1,4 +1,4 @@
-# CRTG Voice Agent
+# Voice Agent
 
 
 
@@ -62,7 +62,7 @@ graph TD
 1.  **Clone the repository**
     ```bash
     git clone https://github.com/Pranay1301/Voice-Agent.git
-    cd Voice-Agent/crtg_voice_agent
+    cd Voice-Agent/voice_agent
     ```
 
 2.  **Install dependencies**
@@ -117,5 +117,5 @@ Contributions are welcome! Please feel free to submit a Pull Request.
 ---
 
 <div align="center">
-  <sub>Built with ❤️ by CRTG AI</sub>
+  <sub>Built with ❤️ by Voice AI</sub>
 </div>

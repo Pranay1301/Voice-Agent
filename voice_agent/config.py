@@ -3,7 +3,7 @@ from functools import lru_cache
 
 class Settings(BaseSettings):
     # App Config
-    APP_NAME: str = "CRTG Voice Agent"
+    APP_NAME: str = "Voice Agent"
     DEBUG: bool = False
     HOST: str = "0.0.0.0"
     PORT: int = 8000
